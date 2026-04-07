@@ -1,0 +1,14 @@
+{
+  "name": "여신 책임자시험 대비",
+  "short_name": "여신시험",
+  "description": "IBK 책임자시험 여신과목 학습 앱",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#1B3C2A",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
