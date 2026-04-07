@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>여신 책임자시험 대비</title>
+    <meta name="theme-color" content="#1B3C2A">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        html,body { width:100%; height:100%; font-family:'Pretendard',system-ui,-apple-system,sans-serif; background:#f0f2f5; color:#1a1a1a; }
+        body { overflow:hidden; }
+        .app { width:100%; height:100vh; display:flex; flex-direction:column; }
+
+        /* Header */
+        .hdr { display:flex; align-items:center; padding:14px 16px; background:linear-gradient(135deg,#1B3C2A,#2a5c40); color:#fff; font-weight:700; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,.15); min-height:52px; }
+        .hdr-back { background:none; border:none; color:#fff; font-size:22px; cursor:pointer; padding:4px 8px 4px 0; display:none; }
+        .hdr-title { flex:1; text-align:center; font-size:17px; letter-spacing:-.3px; }
+        .hdr-right { width:36px; }
+
+        /* Screens */
+        .screen { display:none; flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+        .screen.active { display:flex; flex-direction:column; }
+        .screen-pad { padding:16px 16px 32px; }
+
+        /* Cards */
+        .card { background:#fff; border-radius:14px; padding:18px; margin-bottom:14px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+        .card-title { font-size:14px; font-weight:700; color:#8a8f9c; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+
+        /* Buttons */
+        .btn { display:block; width:100%; padding:16px; border:none; border-radius:12px; font-size:16px; font-weight:700; cursor:pointer; transition:all .15s; text-align:center; }
+        .btn-primary { background:linear-gradient(135deg,#1B3C2A,#2a5c40); color:#fff; box-shadow:0 4px 12px rgba(27,60,42,.25); }
+        .btn-primary:active { transform:scale(.97); }
+        .btn-secondary { background:#e8ecf2; color:#1B3C2A; }
+        .btn-secondary:active { background:#dce1e9; }
+        .btn-danger { background:#e74c3c; color:#fff; }
+        .btn-sm { padding:10px 16px; font-size:14px; width:auto; display:inline-block; }
+
+        /* D-day badge */
+        .dday { display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#e74c3c,#c0392b); color:#fff; border-radius:20px; padding:6px 18px; font-size:22px; font-weight:800; letter-spacing:1px; }
+
+        /* Stat grid */
+        .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .stat-item { text-align:center; padding:12px 8px; background:#f8f9fb; border-radius:10px; }
+        .stat-value { font-size:24px; font-weight:800; color:#1B3C2A; }
+        .stat-label { font-size:12px; color:#8a8f9c; margin-top:4px; }
+        .stat-value.danger { color:#e74c3c; }
+        .stat-value.warning { color:#e67e22; }
+        .stat-value.safe { color:#27ae60; }
+        .stat-value.unmeasured { color:#bdc3c7; font-size:16px; }
+
+        /* Subject bars */
+        .subj-row { display:flex; align-items:center; padding:10px 0; border-bottom:1px solid #f0f2f5; }
+        .subj-row:last-child { border-bottom:none; }
+        .subj-name { flex:1; font-size:14px; font-weight:600; }
+        .subj-rate { font-size:16px; font-weight:700; min-width:50px; text-align:right; }
+        .subj-count { font-size:13px; color:#8a8f9c; min-width:60px; text-align:right; margin-left:8px; }
+        .subj-bar-wrap { width:80px; height:6px; background:#e8ecf2; border-radius:3px; margin-left:10px; }
+        .subj-bar { height:100%; border-radius:3px; transition:width .3s; }
+
+        /* Profile screen */
+        .profile-wrap { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; padding:32px 24px; }
+        .profile-logo { font-size:48px; margin-bottom:20px; }
+        .profile-heading { font-size:22px; font-weight:800; color:#1B3C2A; margin-bottom:8px; }
+        .profile-sub { font-size:14px; color:#666; margin-bottom:32px; text-align:center; line-height:1.6; }
+        .profile-btns { display:flex; gap:16px; width:100%; max-width:320px; }
+        .profile-btn { flex:1; padding:24px 16px; border:3px solid #e8ecf2; border-radius:16px; background:#fff; text-align:center; cursor:pointer; transition:all .15s; }
+        .profile-btn:active { transform:scale(.96); }
+        .profile-btn.selected { border-color:#1B3C2A; background:#f0f8f3; }
+        .profile-btn-name { font-size:32px; font-weight:800; color:#1B3C2A; }
+        .profile-btn-label { font-size:13px; color:#8a8f9c; margin-top:6px; }
+
+        /* Resume banner */
+        .resume-banner { display:none; padding:14px; margin-bottom:14px; background:#fff3cd; border-radius:12px; border:1px solid #ffc107; cursor:pointer; }
+        .resume-banner.show { display:block; }
+        .resume-banner-title { font-size:15px; font-weight:700; color:#856404; }
+        .resume-banner-sub { font-size:13px; color:#a17c1a; margin-top:4px; }
+
+        /* Empty state */
+        .empty-state { text-align:center; padding:40px 20px; color:#8a8f9c; }
+        .empty-state-icon { font-size:48px; margin-bottom:12px; }
+        .empty-state-text { font-size:15px; line-height:1.6; }
+
+        /* Home menu grid */
+        .home-menu { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+        .home-menu-btn { padding:16px 12px; background:#fff; border:none; border-radius:12px; text-align:center; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.06); transition:all .15s; }
+        .home-menu-btn:active { transform:scale(.96); background:#f8f9fb; }
+        .home-menu-icon { font-size:24px; margin-bottom:6px; }
+        .home-menu-label { font-size:14px; font-weight:600; color:#1B3C2A; }
+        .home-menu-sub { font-size:12px; color:#8a8f9c; margin-top:2px; }
+
+        /* Filter bar */
+        .filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+        .filter-chip { padding:6px 14px; border-radius:20px; border:1.5px solid #e8ecf2; background:#fff; font-size:12px; font-weight:600; color:#5a6070; cursor:pointer; transition:all .15s; }
+        .filter-chip.active { border-color:#1B3C2A; background:#1B3C2A; color:#fff; }
+        .filter-chip:active { transform:scale(.95); }
+
+        /* Wrong notes item */
+        .wn-item { padding:14px 16px; background:#fff; border-radius:12px; margin-bottom:10px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.05); transition:all .15s; }
+        .wn-item:active { background:#f8f9fb; }
+        .wn-item-top { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+        .wn-item-subj { font-size:11px; padding:2px 8px; border-radius:4px; background:#e8ecf2; color:#5a6070; font-weight:600; }
+        .wn-item-stem { font-size:13px; color:#333; line-height:1.4; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+        .wn-item-meta { font-size:11px; color:#aaa; margin-top:6px; }
+
+        /* Select grid/list */
+        .select-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0; }
+        .select-card { padding:16px; background:#fff; border:2px solid #e8ecf2; border-radius:12px; text-align:center; cursor:pointer; transition:all .15s; }
+        .select-card:active { transform:scale(.97); }
+        .select-card.selected { border-color:#1B3C2A; background:#f0f8f3; }
+        .select-card.disabled { opacity:.4; pointer-events:none; }
+        .select-card-title { font-size:15px; font-weight:700; color:#1B3C2A; }
+        .select-card-sub { font-size:12px; color:#8a8f9c; margin-top:4px; }
+        .select-list { display:flex; flex-direction:column; gap:10px; margin:12px 0; }
+        .select-list .select-card { text-align:left; }
+
+        /* Count selector */
+        .count-grid { display:flex; gap:10px; margin:12px 0; }
+        .count-btn { flex:1; padding:12px; background:#fff; border:2px solid #e8ecf2; border-radius:10px; text-align:center; font-size:15px; font-weight:700; color:#1B3C2A; cursor:pointer; transition:all .15s; }
+        .count-btn.selected { border-color:#1B3C2A; background:#f0f8f3; }
+        .count-btn:active { transform:scale(.96); }
+
+        /* Section heading */
+        .sec-heading { font-size:18px; font-weight:700; color:#1B3C2A; margin-bottom:4px; }
+        .sec-sub { font-size:13px; color:#8a8f9c; margin-bottom:16px; }
+
+        /* Question screen */
+        .q-progress { display:flex; align-items:center; padding:12px 16px; background:#fff; border-bottom:1px solid #f0f2f5; }
+        .q-progress-bar { flex:1; height:4px; background:#e8ecf2; border-radius:2px; margin:0 12px; }
+        .q-progress-fill { height:100%; background:linear-gradient(90deg,#1B3C2A,#3d8a5a); border-radius:2px; transition:width .3s; }
+        .q-counter { font-size:14px; font-weight:700; color:#1B3C2A; min-width:50px; }
+        .q-timer { font-size:14px; color:#8a8f9c; min-width:40px; text-align:right; }
+        .q-timer.countdown { color:#e74c3c; font-weight:700; }
+        .q-timer.countdown.warning { animation:pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+        .q-body { flex:1; overflow-y:auto; padding:20px 16px; }
+        .q-tags { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+        .q-tag { font-size:12px; padding:4px 10px; background:#e8ecf2; color:#5a6070; border-radius:6px; }
+        .q-stem { font-size:17px; line-height:1.7; font-weight:500; margin-bottom:20px; word-break:keep-all; white-space:pre-line; }
+        .q-choices { display:flex; flex-direction:column; gap:10px; }
+        .q-choice { display:flex; align-items:flex-start; padding:14px 16px; background:#fff; border:2px solid #e8ecf2; border-radius:12px; cursor:pointer; transition:all .15s; }
+        .q-choice:active { transform:scale(.98); }
+        .q-choice.selected { border-color:#1B3C2A; background:#f0f8f3; }
+        .q-choice.correct { border-color:#27ae60; background:#eafaf1; }
+        .q-choice.wrong { border-color:#e74c3c; background:#fdf0ee; }
+        .q-choice.show-correct { border-color:#27ae60; background:#eafaf1; }
+        .q-choice.disabled { pointer-events:none; }
+        .q-choice-num { min-width:26px; height:26px; border-radius:50%; background:#e8ecf2; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#5a6070; margin-right:12px; flex-shrink:0; }
+        .q-choice.selected .q-choice-num { background:#1B3C2A; color:#fff; }
+        .q-choice.correct .q-choice-num { background:#27ae60; color:#fff; }
+        .q-choice.wrong .q-choice-num { background:#e74c3c; color:#fff; }
+        .q-choice.show-correct .q-choice-num { background:#27ae60; color:#fff; }
+        .q-choice-text { font-size:15px; line-height:1.55; flex:1; word-break:keep-all; }
+
+        /* Feedback panel */
+        .feedback { margin-top:20px; padding:16px; border-radius:12px; animation:fadeIn .3s; }
+        .feedback.correct-fb { background:#eafaf1; border-left:4px solid #27ae60; }
+        .feedback.wrong-fb { background:#fdf0ee; border-left:4px solid #e74c3c; }
+        .fb-verdict { font-size:17px; font-weight:700; margin-bottom:8px; }
+        .fb-verdict.correct-v { color:#27ae60; }
+        .fb-verdict.wrong-v { color:#e74c3c; }
+        .fb-explanation { font-size:15px; line-height:1.6; color:#555; white-space:pre-line; }
+
+        .q-next-wrap { padding:16px; background:#fff; border-top:1px solid #f0f2f5; }
+
+        /* Mock nav */
+        .mock-nav { padding:10px 16px; background:#fff; border-top:1px solid #f0f2f5; }
+        .mock-nav-grid { display:flex; flex-wrap:wrap; gap:4px; justify-content:center; margin-bottom:8px; max-height:120px; overflow-y:auto; }
+        .mock-nav-num { width:28px; height:28px; border-radius:6px; border:1.5px solid #e8ecf2; background:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#666; cursor:pointer; transition:all .1s; flex-shrink:0; }
+        .mock-nav-num.answered { background:#1B3C2A; color:#fff; border-color:#1B3C2A; }
+        .mock-nav-num.current { border-color:#e74c3c; box-shadow:0 0 0 2px rgba(231,76,60,.3); }
+        .mock-nav-num:active { transform:scale(.9); }
+        .mock-nav-btns { display:flex; gap:10px; }
+        .mock-nav-btns .btn { flex:1; padding:12px; font-size:14px; }
+        .btn-submit { background:linear-gradient(135deg,#e74c3c,#c0392b); color:#fff; box-shadow:0 4px 12px rgba(231,76,60,.25); }
+        .btn-submit:active { transform:scale(.97); }
+        .unanswered-warn { padding:12px 16px; background:#fff3cd; border-radius:10px; margin-bottom:10px; font-size:13px; color:#856404; font-weight:600; text-align:center; }
+
+        /* Result screen */
+        .result-summary { text-align:center; padding:24px 16px; }
+        .result-score { font-size:56px; font-weight:800; }
+        .result-score.pass { color:#27ae60; }
+        .result-score.fail { color:#e74c3c; }
+        .result-detail { font-size:15px; color:#666; margin-top:6px; }
+        .result-pass-fail { font-size:14px; font-weight:700; text-align:center; margin-top:4px; }
+        .result-subj { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f2f5; }
+        .result-subj:last-child { border-bottom:none; }
+        .result-subj-name { font-size:15px; font-weight:600; }
+        .result-subj-score { font-size:16px; font-weight:700; }
+
+        /* Review list */
+        .review-item { padding:14px; border-bottom:1px solid #f0f2f5; cursor:pointer; }
+        .review-item:active { background:#f8f9fb; }
+        .review-item-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+        .review-badge { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; flex-shrink:0; }
+        .review-badge.o { background:#27ae60; }
+        .review-badge.x { background:#e74c3c; }
+        .review-num { font-size:14px; font-weight:700; color:#666; }
+        .review-stem { font-size:14px; color:#444; line-height:1.4; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+
+        .review-detail { padding:16px; }
+        .review-detail .q-stem { font-size:17px; }
+
+        /* Session info banner */
+        .session-info { display:flex; gap:12px; padding:10px 16px; background:#f8f9fb; font-size:13px; color:#666; border-bottom:1px solid #eee; }
+        .session-info span { display:flex; align-items:center; gap:4px; }
+
+        /* Settings */
+        .setting-row { padding:14px 0; border-bottom:1px solid #f0f2f5; }
+        .setting-row:last-child { border-bottom:none; }
+        .setting-label { font-size:14px; font-weight:600; color:#1B3C2A; margin-bottom:6px; }
+        .setting-desc { font-size:12px; color:#8a8f9c; margin-bottom:8px; }
+
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-thumb { background:#ccc; border-radius:2px; }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- Header -->
+    <div class="hdr">
+        <button class="hdr-back" id="hdrBack" onclick="goBack()">&#8592;</button>
+        <div class="hdr-title" id="hdrTitle">여신 책임자시험 대비</div>
+        <div class="hdr-right"><button style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px" onclick="navigate('settings')" id="hdrSettings">&#9881;</button></div>
+    </div>
+
+    <!-- ========== PROFILE SELECT ========== -->
+    <section class="screen" id="screen-profile">
+        <div class="profile-wrap">
+            <div class="profile-logo">&#128218;</div>
+            <div class="profile-heading">여신 책임자시험 대비</div>
+            <div class="profile-sub">사용자를 선택해 주세요.<br>선택 후 자동 저장됩니다.</div>
+            <div class="profile-btns">
+                <div class="profile-btn" onclick="selectProfile('A')">
+                    <div class="profile-btn-name">A</div>
+                    <div class="profile-btn-label">사용자 A</div>
+                </div>
+                <div class="profile-btn" onclick="selectProfile('B')">
+                    <div class="profile-btn-name">B</div>
+                    <div class="profile-btn-label">사용자 B</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== HOME ========== -->
+    <section class="screen screen-pad" id="screen-home">
+        <div style="text-align:center;margin-bottom:16px">
+            <div class="dday" id="ddayBadge">D-?</div>
+            <div style="font-size:12px;color:#888;margin-top:6px" id="profileBadge"></div>
+        </div>
+
+        <div class="resume-banner" id="resumeBanner" onclick="resumeSession()">
+            <div class="resume-banner-title">진행 중인 세션이 있습니다</div>
+            <div class="resume-banner-sub" id="resumeSub"></div>
+        </div>
+
+        <button class="btn btn-primary" style="margin-bottom:14px" onclick="showSessionSetup()">
+            오늘의 추천 세션 시작
+        </button>
+
+        <div class="home-menu">
+            <button class="home-menu-btn" onclick="showVolumeSelect()">
+                <div class="home-menu-icon">&#128218;</div>
+                <div class="home-menu-label">권별 학습</div>
+                <div class="home-menu-sub">1·2·3권 선택</div>
+            </button>
+            <button class="home-menu-btn" onclick="showWrongNotes()">
+                <div class="home-menu-icon">&#128221;</div>
+                <div class="home-menu-label">오답노트</div>
+                <div class="home-menu-sub" id="homeWrongCount"></div>
+            </button>
+            <button class="home-menu-btn" onclick="showMockSetup()">
+                <div class="home-menu-icon">&#128203;</div>
+                <div class="home-menu-label">모의고사</div>
+                <div class="home-menu-sub">전체범위 실전</div>
+            </button>
+            <button class="home-menu-btn" onclick="showChapterSelect()">
+                <div class="home-menu-icon">&#128269;</div>
+                <div class="home-menu-label">챕터별 학습</div>
+                <div class="home-menu-sub">세부 선택</div>
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">학습 현황</div>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="statStudyDays">0</div>
+                    <div class="stat-label">최근 7일 학습일</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statTotalQ">0</div>
+                    <div class="stat-label">총 풀이 수</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statTotalRate">-</div>
+                    <div class="stat-label">전체 정답률</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statWrongQ">0</div>
+                    <div class="stat-label">오답 문항</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">권별 현황</div>
+            <div id="volStats"></div>
+        </div>
+
+        <div class="card" id="recentMockCard" style="display:none">
+            <div class="card-title">최근 모의고사</div>
+            <div id="recentMockContent"></div>
+        </div>
+    </section>
+
+    <!-- ========== SESSION SETUP (추천 세션) ========== -->
+    <section class="screen screen-pad" id="screen-session">
+        <h2 style="font-size:20px;font-weight:700;margin-bottom:4px">추천 세션</h2>
+        <p style="font-size:14px;color:#666;margin-bottom:8px">학습 시간을 선택하세요</p>
+        <div class="select-grid" id="timeGrid">
+            <div class="select-card" data-min="20" onclick="selectTime(this)">
+                <div class="select-card-title">20분</div>
+                <div class="select-card-sub">~15문항</div>
+            </div>
+            <div class="select-card selected" data-min="30" onclick="selectTime(this)">
+                <div class="select-card-title">30분</div>
+                <div class="select-card-sub">~22문항</div>
+            </div>
+            <div class="select-card" data-min="60" onclick="selectTime(this)">
+                <div class="select-card-title">60분</div>
+                <div class="select-card-sub">~45문항</div>
+            </div>
+            <div class="select-card" data-min="90" onclick="selectTime(this)">
+                <div class="select-card-title">90분</div>
+                <div class="select-card-sub">~65문항</div>
+            </div>
+        </div>
+        <div class="card" id="sessionPreview" style="margin-top:8px">
+            <div class="card-title">세션 미리보기</div>
+            <div id="sessionPreviewContent" style="font-size:13px;color:#666">구성 중...</div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:16px" onclick="startSession()">세션 시작</button>
+    </section>
+
+    <!-- ========== VOLUME SELECT ========== -->
+    <section class="screen screen-pad" id="screen-volume">
+        <div class="sec-heading">권별 학습</div>
+        <div class="sec-sub">학습할 권을 선택하세요</div>
+        <div class="select-list" id="volumeSelectList"></div>
+    </section>
+
+    <!-- ========== VOLUME SETUP ========== -->
+    <section class="screen screen-pad" id="screen-volume-setup">
+        <div class="sec-heading" id="volSetupTitle">1권 학습</div>
+        <div class="sec-sub">학습 모드 선택</div>
+        <div class="select-list" id="volModeList">
+            <div class="select-card selected" data-mode="mixed" onclick="selectVolMode(this)">
+                <div class="select-card-title">혼합</div>
+                <div class="select-card-sub">오답 + 신규 + 복습 균형</div>
+            </div>
+            <div class="select-card" data-mode="new" onclick="selectVolMode(this)">
+                <div class="select-card-title">신규 중심</div>
+                <div class="select-card-sub">아직 풀지 않은 문항 우선</div>
+            </div>
+            <div class="select-card" data-mode="wrong" onclick="selectVolMode(this)">
+                <div class="select-card-title">오답 중심</div>
+                <div class="select-card-sub">최근 틀린 문항 우선</div>
+            </div>
+            <div class="select-card" data-mode="review" onclick="selectVolMode(this)">
+                <div class="select-card-title">복습 중심</div>
+                <div class="select-card-sub">맞춘 적 있는 문항 복습</div>
+            </div>
+        </div>
+        <div class="sec-sub" style="margin-top:16px">문항 수</div>
+        <div class="count-grid">
+            <div class="count-btn selected" data-count="10" onclick="selectVolCount(this)">10</div>
+            <div class="count-btn" data-count="20" onclick="selectVolCount(this)">20</div>
+            <div class="count-btn" data-count="all" onclick="selectVolCount(this)">전체</div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:20px" onclick="startVolumeSession()">학습 시작</button>
+    </section>
+
+    <!-- ========== CHAPTER SELECT ========== -->
+    <section class="screen screen-pad" id="screen-chapter">
+        <div class="sec-heading">챕터별 학습</div>
+        <div class="sec-sub">학습할 챕터를 선택하세요</div>
+        <div class="select-list" id="chapterSelectList"></div>
+    </section>
+
+    <!-- ========== CHAPTER SETUP ========== -->
+    <section class="screen screen-pad" id="screen-chapter-setup">
+        <div class="sec-heading" id="chSetupTitle">챕터 학습</div>
+        <div class="sec-sub">학습 모드 선택</div>
+        <div class="select-list" id="chModeList">
+            <div class="select-card selected" data-mode="mixed" onclick="selectChMode(this)">
+                <div class="select-card-title">혼합</div>
+                <div class="select-card-sub">오답 + 신규 + 복습 균형</div>
+            </div>
+            <div class="select-card" data-mode="new" onclick="selectChMode(this)">
+                <div class="select-card-title">신규 중심</div>
+                <div class="select-card-sub">아직 풀지 않은 문항 우선</div>
+            </div>
+            <div class="select-card" data-mode="wrong" onclick="selectChMode(this)">
+                <div class="select-card-title">오답 중심</div>
+                <div class="select-card-sub">최근 틀린 문항 우선</div>
+            </div>
+            <div class="select-card" data-mode="review" onclick="selectChMode(this)">
+                <div class="select-card-title">복습 중심</div>
+                <div class="select-card-sub">맞춘 적 있는 문항 복습</div>
+            </div>
+        </div>
+        <div class="sec-sub" style="margin-top:16px">문항 수</div>
+        <div class="count-grid">
+            <div class="count-btn selected" data-count="10" onclick="selectChCount(this)">10</div>
+            <div class="count-btn" data-count="20" onclick="selectChCount(this)">20</div>
+            <div class="count-btn" data-count="all" onclick="selectChCount(this)">전체</div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:20px" onclick="startChapterSession()">학습 시작</button>
+    </section>
+
+    <!-- ========== QUESTION ========== -->
+    <section class="screen" id="screen-question">
+        <div class="q-progress">
+            <span class="q-counter" id="qCounter">1/10</span>
+            <div class="q-progress-bar"><div class="q-progress-fill" id="qProgressFill"></div></div>
+            <span class="q-timer" id="qTimer">0s</span>
+        </div>
+        <div class="session-info" id="sessionInfo">
+            <span id="sessionInfoMode"></span>
+            <span id="sessionInfoSubj"></span>
+        </div>
+        <div class="q-body" id="qBody"></div>
+        <div class="mock-nav" id="mockNavPanel" style="display:none">
+            <div class="mock-nav-grid" id="mockNavGrid"></div>
+            <div class="mock-nav-btns">
+                <button class="btn btn-secondary" id="mockPrevBtn" onclick="prevQuestion()">이전</button>
+                <button class="btn btn-primary" id="mockNextBtn" onclick="nextQuestion()">다음</button>
+                <button class="btn btn-submit" id="mockSubmitBtn" onclick="submitMock()" style="display:none">제출</button>
+            </div>
+        </div>
+        <div class="q-next-wrap" id="qNextWrap" style="display:none">
+            <button class="btn btn-primary" id="qNextBtn" onclick="nextQuestion()">다음 문항</button>
+        </div>
+    </section>
+
+    <!-- ========== RESULT ========== -->
+    <section class="screen screen-pad" id="screen-result">
+        <div class="card">
+            <div class="result-summary">
+                <div class="result-score" id="resultScore">0%</div>
+                <div class="result-detail" id="resultDetail"></div>
+                <div class="result-pass-fail" id="resultPassFail"></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">권별 결과</div>
+            <div id="resultSubjects"></div>
+        </div>
+        <button class="btn btn-secondary" style="margin-bottom:10px" onclick="showReviewList()">문항별 리뷰</button>
+        <button class="btn btn-primary" onclick="navigate('home')">홈으로</button>
+    </section>
+
+    <!-- ========== REVIEW LIST ========== -->
+    <section class="screen" id="screen-review">
+        <div id="reviewList" style="padding-bottom:32px"></div>
+    </section>
+
+    <!-- ========== REVIEW DETAIL ========== -->
+    <section class="screen screen-pad" id="screen-review-detail">
+        <div id="reviewDetailContent"></div>
+        <div style="margin-top:16px;display:flex;gap:10px">
+            <button class="btn btn-secondary" style="flex:1" onclick="navigate('review')">목록으로</button>
+            <button class="btn btn-primary" style="flex:1" id="reviewNextBtn" onclick="reviewNext()">다음 문항</button>
+        </div>
+    </section>
+
+    <!-- ========== WRONG NOTES ========== -->
+    <section class="screen screen-pad" id="screen-wrong-notes">
+        <div class="filter-bar" id="wnFilters"></div>
+        <div id="wnSortBar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span id="wnCount" style="font-size:13px;color:#8a8f9c"></span>
+            <button class="filter-chip" onclick="toggleWrongSort()" id="wnSortBtn">최근순</button>
+        </div>
+        <div id="wrongNotesList"></div>
+    </section>
+
+    <!-- ========== WRONG NOTE DETAIL ========== -->
+    <section class="screen screen-pad" id="screen-wrong-detail">
+        <div id="wrongDetailContent"></div>
+        <div style="margin-top:16px;display:flex;gap:10px">
+            <button class="btn btn-secondary" style="flex:1" onclick="navigate('wrong-notes')">목록으로</button>
+            <button class="btn btn-primary" style="flex:1" id="wrongNextBtn" onclick="wrongNoteNext()">다음 문항</button>
+        </div>
+    </section>
+
+    <!-- ========== MOCK SETUP ========== -->
+    <section class="screen screen-pad" id="screen-mock-setup">
+        <div class="sec-heading">모의고사</div>
+        <div class="sec-sub">전체범위 실전 모의고사</div>
+        <div class="card">
+            <div style="font-size:14px;line-height:1.8;color:#444">
+                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f2f5"><span>총 문항 수</span><strong id="mockTotalQ">50문항</strong></div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f2f5"><span>시간 제한</span><strong id="mockTimeLimit">60분</strong></div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f2f5"><span>합격 기준</span><strong>60% 이상</strong></div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0"><span>선택지 순서</span><strong>고정 (실전 동일)</strong></div>
+            </div>
+        </div>
+        <div class="sec-sub" style="margin-top:12px">문항 수 / 시간</div>
+        <div class="count-grid">
+            <div class="count-btn" data-mock="30" onclick="selectMockSize(this)">30문항<br><span style="font-size:11px;color:#888">36분</span></div>
+            <div class="count-btn selected" data-mock="50" onclick="selectMockSize(this)">50문항<br><span style="font-size:11px;color:#888">60분</span></div>
+            <div class="count-btn" data-mock="100" onclick="selectMockSize(this)">100문항<br><span style="font-size:11px;color:#888">120분</span></div>
+        </div>
+        <div class="card" style="margin-top:12px">
+            <div class="card-title">권별 출제 비율</div>
+            <div id="mockDistPreview" style="font-size:13px;color:#555;line-height:1.7"></div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:12px" onclick="startMock()">모의고사 시작</button>
+    </section>
+
+    <!-- ========== SETTINGS ========== -->
+    <section class="screen screen-pad" id="screen-settings">
+        <div class="sec-heading">설정</div>
+        <div class="card">
+            <div class="setting-row">
+                <div class="setting-label">현재 사용자</div>
+                <div style="font-size:16px;font-weight:700;color:#1B3C2A" id="settingsProfile">-</div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">학습 데이터 초기화</div>
+                <div class="setting-desc">현재 사용자의 모든 학습 기록을 삭제합니다.</div>
+                <button class="btn btn-danger btn-sm" onclick="resetProgress()">초기화</button>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">사용자 전환</div>
+                <div class="setting-desc">다른 사용자 프로필로 전환합니다.</div>
+                <button class="btn btn-secondary btn-sm" onclick="switchProfile()">전환</button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="setting-label">데이터 현황</div>
+            <div style="font-size:13px;color:#666;margin-top:8px;line-height:1.8" id="settingsDataInfo"></div>
+        </div>
+    </section>
+</div>
+
+<script>
+/* ================================================================
+   여신 책임자시험 대비 앱 — JavaScript
+   ================================================================ */
+
+// ─── Constants ───
+const EXAM_DATE = '2026-04-25';
+const VOLUME_META = [
+    { id:'V1', name:'1권 · 여신기본', chapters:[
+        {id:'CH1',name:'여신총론',count:13},
+        {id:'CH2',name:'여신상담 및 결정',count:44},
+        {id:'CH3',name:'담보운용',count:37}
+    ]},
+    { id:'V2', name:'2권 · 여신운용', chapters:[
+        {id:'CH1',name:'여신심사',count:33},
+        {id:'CH2',name:'여신약정 및 수수료',count:12},
+        {id:'CH3',name:'여신일반관리',count:20},
+        {id:'CH4',name:'여신사후관리',count:35}
+    ]},
+    { id:'V3', name:'3권 · 여신상품', chapters:[
+        {id:'CH1',name:'가계대출상품',count:57},
+        {id:'CH2',name:'기업여신상품',count:54}
+    ]}
+];
+const NUMS = ['①','②','③','④'];
+
+// ─── App State ───
+const APP = {
+    profile: null,          // 'A' or 'B'
+    questionBank: {},       // { V1:[...], V2:[...], V3:[...] }
+    progress: {},           // { [qid]: ProgressRecord }
+    sessions: [],           // SessionLog[]
+    resume: null,           // ResumeState | null
+    currentSession: null,   // active session
+    allQuestions: []         // flat array of all questions
+};
+
+// ─── Storage Layer ───
+const Storage = {
+    _key(name) { return `loan_exam_${APP.profile}_${name}`; },
+    loadProgress() { try { APP.progress = JSON.parse(localStorage.getItem(this._key('progress'))) || {}; } catch(e) { APP.progress = {}; } },
+    saveProgress() { localStorage.setItem(this._key('progress'), JSON.stringify(APP.progress)); },
+    loadSessions() { try { APP.sessions = JSON.parse(localStorage.getItem(this._key('sessions'))) || []; } catch(e) { APP.sessions = []; } },
+    saveSessions() { localStorage.setItem(this._key('sessions'), JSON.stringify(APP.sessions)); },
+    loadResume() { try { APP.resume = JSON.parse(localStorage.getItem(this._key('resume'))); } catch(e) { APP.resume = null; } },
+    saveResume(state) { APP.resume = state; localStorage.setItem(this._key('resume'), JSON.stringify(state)); },
+    clearResume() { APP.resume = null; localStorage.removeItem(this._key('resume')); },
+    getProfile() { return localStorage.getItem('loan_exam_profile'); },
+    setProfile(p) { localStorage.setItem('loan_exam_profile', p); }
+};
+
+// ─── Data Loading ───
+async function loadAllQuestions() {
+    const vols = ['V1','V2','V3'];
+    const results = await Promise.all(vols.map(v =>
+        fetch(`data/${v}.json`).then(r => r.json())
+    ));
+    vols.forEach((v,i) => { APP.questionBank[v] = results[i]; });
+    APP.allQuestions = results.flat();
+}
+
+function getQuestionsByVolume(vol) { return APP.questionBank[vol] || []; }
+function getQuestionsByChapter(vol, ch) { return (APP.questionBank[vol] || []).filter(q => q.chapter === ch); }
+function getQuestionById(qid) { return APP.allQuestions.find(q => q.question_id === qid); }
+
+// ─── Navigation ───
+let screenStack = [];
+let currentScreen = '';
+
+function navigate(name, pushHistory) {
+    if (pushHistory !== false && currentScreen && currentScreen !== name) {
+        screenStack.push(currentScreen);
+    }
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('screen-' + name);
+    if (el) el.classList.add('active');
+    currentScreen = name;
+
+    // Header
+    const back = document.getElementById('hdrBack');
+    const title = document.getElementById('hdrTitle');
+    const settings = document.getElementById('hdrSettings');
+    back.style.display = (name === 'home' || name === 'profile') ? 'none' : 'block';
+    settings.style.display = (name === 'question') ? 'none' : 'block';
+
+    const titles = {
+        home:'여신 책임자시험 대비', profile:'사용자 선택', session:'추천 세션',
+        volume:'권별 학습', 'volume-setup':'학습 설정', chapter:'챕터별 학습',
+        'chapter-setup':'챕터 학습 설정', question:'문제 풀기', result:'결과',
+        review:'문항 리뷰', 'review-detail':'리뷰 상세', 'wrong-notes':'오답노트',
+        'wrong-detail':'오답 상세', 'mock-setup':'모의고사', settings:'설정'
+    };
+    title.textContent = titles[name] || '여신 책임자시험 대비';
+
+    if (name === 'home') { screenStack = []; renderHome(); }
+    window.location.hash = name;
+}
+
+function goBack() {
+    if (currentScreen === 'question' && APP.currentSession) {
+        if (!confirm('학습을 중단하고 나가시겠습니까?\n진행 상황은 저장됩니다.')) return;
+        pauseSession();
+    }
+    const prev = screenStack.pop() || 'home';
+    navigate(prev, false);
+}
+
+// ─── Profile ───
+function selectProfile(p) {
+    APP.profile = p;
+    Storage.setProfile(p);
+    initAfterProfile();
+}
+
+function switchProfile() {
+    if (!confirm('사용자를 전환하시겠습니까?')) return;
+    navigate('profile');
+}
+
+async function initAfterProfile() {
+    Storage.loadProgress();
+    Storage.loadSessions();
+    Storage.loadResume();
+    await loadAllQuestions();
+    navigate('home');
+}
+
+// ─── Home ───
+function renderHome() {
+    // D-day
+    const today = new Date(); today.setHours(0,0,0,0);
+    const exam = new Date(EXAM_DATE); exam.setHours(0,0,0,0);
+    const diff = Math.ceil((exam - today) / 86400000);
+    document.getElementById('ddayBadge').textContent = diff > 0 ? `D-${diff}` : diff === 0 ? 'D-DAY' : `D+${-diff}`;
+    document.getElementById('profileBadge').textContent = `사용자 ${APP.profile}`;
+
+    // Resume banner
+    const rb = document.getElementById('resumeBanner');
+    if (APP.resume) {
+        rb.classList.add('show');
+        const answered = Object.keys(APP.resume.answers).length;
+        const total = APP.resume.questionOrder.length;
+        document.getElementById('resumeSub').textContent = `${answered}/${total}문항 완료 · ${APP.resume.mode}`;
+    } else {
+        rb.classList.remove('show');
+    }
+
+    // Stats
+    renderHomeStats();
+    renderVolStats();
+    updateHomeWrongCount();
+    renderRecentMock();
+}
+
+function renderHomeStats() {
+    const prog = APP.progress;
+    const qids = Object.keys(prog);
+    let attempted = 0, correct = 0;
+    const daySet = new Set();
+    const now = Date.now();
+    const sevenDays = 7 * 86400000;
+
+    qids.forEach(qid => {
+        const p = prog[qid];
+        if (p.attempts > 0) {
+            attempted += p.attempts;
+            correct += p.correct_count;
+            if (p.last_seen_at && (now - new Date(p.last_seen_at).getTime()) < sevenDays) {
+                daySet.add(new Date(p.last_seen_at).toDateString());
+            }
+        }
+    });
+
+    document.getElementById('statStudyDays').textContent = daySet.size;
+    document.getElementById('statTotalQ').textContent = attempted;
+    document.getElementById('statTotalRate').textContent = attempted > 0 ? Math.round(correct/attempted*100)+'%' : '-';
+    const wrongCount = qids.filter(qid => prog[qid].attempts > 0 && !prog[qid].last_correct).length;
+    document.getElementById('statWrongQ').textContent = wrongCount;
+    document.getElementById('statWrongQ').className = 'stat-value' + (wrongCount > 20 ? ' danger' : wrongCount > 10 ? ' warning' : ' safe');
+}
+
+function renderVolStats() {
+    const container = document.getElementById('volStats');
+    let html = '';
+    VOLUME_META.forEach(vol => {
+        const qs = getQuestionsByVolume(vol.id);
+        let att = 0, cor = 0;
+        qs.forEach(q => {
+            const p = APP.progress[q.question_id];
+            if (p && p.attempts > 0) { att++; cor += p.last_correct ? 1 : 0; }
+        });
+        const rate = att > 0 ? Math.round(cor/att*100) : -1;
+        const rateText = rate >= 0 ? rate+'%' : '미측정';
+        const color = rate < 0 ? '#bdc3c7' : rate >= 70 ? '#27ae60' : rate >= 50 ? '#e67e22' : '#e74c3c';
+        html += `<div class="subj-row">
+            <div class="subj-name">${vol.name}</div>
+            <div class="subj-rate" style="color:${color}">${rateText}</div>
+            <div class="subj-count">${att}/${qs.length}</div>
+            <div class="subj-bar-wrap"><div class="subj-bar" style="width:${att>0?Math.round(att/qs.length*100):0}%;background:${color}"></div></div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function updateHomeWrongCount() {
+    const cnt = Object.keys(APP.progress).filter(qid => {
+        const p = APP.progress[qid];
+        return p.attempts > 0 && !p.last_correct;
+    }).length;
+    document.getElementById('homeWrongCount').textContent = cnt > 0 ? cnt + '문항' : '';
+}
+
+function renderRecentMock() {
+    const mocks = APP.sessions.filter(s => s.mode === 'mock');
+    const card = document.getElementById('recentMockCard');
+    if (mocks.length === 0) { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    const last = mocks[mocks.length - 1];
+    const pct = Math.round(last.correct_count / last.actual_question_count * 100);
+    const pass = pct >= 60;
+    document.getElementById('recentMockContent').innerHTML = `
+        <div style="text-align:center">
+            <div style="font-size:28px;font-weight:800;color:${pass?'#27ae60':'#e74c3c'}">${pct}%</div>
+            <div style="font-size:13px;color:#666;margin-top:4px">${last.correct_count}/${last.actual_question_count}문항 · ${pass?'합격':'불합격'}</div>
+            <div style="font-size:11px;color:#aaa;margin-top:4px">${new Date(last.completed_at).toLocaleDateString('ko')}</div>
+        </div>`;
+}
+
+// ─── Session Setup (추천) ───
+let sessionMinutes = 30;
+let sessionQuestions = [];
+
+function showSessionSetup() {
+    navigate('session');
+    sessionMinutes = 30;
+    document.querySelectorAll('#timeGrid .select-card').forEach(el => {
+        el.classList.toggle('selected', el.dataset.min === '30');
+    });
+    previewSession();
+}
+
+function selectTime(el) {
+    document.querySelectorAll('#timeGrid .select-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    sessionMinutes = parseInt(el.dataset.min);
+    previewSession();
+}
+
+function previewSession() {
+    sessionQuestions = generateRecommended(sessionMinutes);
+    const byVol = {};
+    sessionQuestions.forEach(q => { byVol[q.volume] = (byVol[q.volume]||0) + 1; });
+    let html = `<div style="margin-bottom:6px"><strong>${sessionQuestions.length}문항</strong> (약 ${sessionMinutes}분)</div>`;
+    Object.keys(byVol).sort().forEach(v => {
+        const meta = VOLUME_META.find(m => m.id === v);
+        html += `<div style="padding:2px 0">${meta.name}: ${byVol[v]}문항</div>`;
+    });
+    document.getElementById('sessionPreviewContent').innerHTML = html;
+}
+
+function generateRecommended(minutes) {
+    const totalQ = Math.round(minutes * 0.73);
+    const allQ = [...APP.allQuestions];
+
+    // Classify
+    const pools = { wrong:[], newQ:[], review:[], mastered:[] };
+    allQ.forEach(q => {
+        const p = APP.progress[q.question_id];
+        if (!p || p.attempts === 0) pools.newQ.push(q);
+        else if (!p.last_correct) pools.wrong.push(q);
+        else if (p.correct_count >= 2) pools.mastered.push(q);
+        else pools.review.push(q);
+    });
+
+    // Shuffle each pool
+    [pools.wrong, pools.newQ, pools.review, pools.mastered].forEach(shuffleArray);
+
+    // Allocate: wrong 35%, new 30%, review 22%, mastered 13%
+    const allocations = [
+        { pool: pools.wrong, pct: 0.35 },
+        { pool: pools.newQ, pct: 0.30 },
+        { pool: pools.review, pct: 0.22 },
+        { pool: pools.mastered, pct: 0.13 }
+    ];
+
+    const selected = [];
+    const usedIds = new Set();
+
+    allocations.forEach(({pool, pct}) => {
+        const target = Math.round(totalQ * pct);
+        let added = 0;
+        for (const q of pool) {
+            if (added >= target || selected.length >= totalQ) break;
+            if (!usedIds.has(q.question_id)) {
+                selected.push(q);
+                usedIds.add(q.question_id);
+                added++;
+            }
+        }
+    });
+
+    // Fill remaining from any pool
+    const remaining = totalQ - selected.length;
+    if (remaining > 0) {
+        const allPools = [...pools.wrong, ...pools.newQ, ...pools.review, ...pools.mastered];
+        for (const q of allPools) {
+            if (selected.length >= totalQ) break;
+            if (!usedIds.has(q.question_id)) {
+                selected.push(q);
+                usedIds.add(q.question_id);
+            }
+        }
+    }
+
+    shuffleArray(selected);
+    return selected;
+}
+
+function startSession() {
+    if (sessionQuestions.length === 0) { alert('문항이 없습니다.'); return; }
+    launchSession(sessionQuestions, 'recommended');
+}
+
+// ─── Volume Select ───
+let selectedVolume = null;
+let volMode = 'mixed';
+let volCount = 10;
+
+function showVolumeSelect() {
+    navigate('volume');
+    const container = document.getElementById('volumeSelectList');
+    let html = '';
+    VOLUME_META.forEach(vol => {
+        const qs = getQuestionsByVolume(vol.id);
+        let att = 0;
+        qs.forEach(q => { if (APP.progress[q.question_id]?.attempts > 0) att++; });
+        html += `<div class="select-card" onclick="selectVolume('${vol.id}')">
+            <div class="select-card-title">${vol.name}</div>
+            <div class="select-card-sub">${qs.length}문항 · 풀이 ${att}문항</div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function selectVolume(volId) {
+    selectedVolume = volId;
+    const meta = VOLUME_META.find(v => v.id === volId);
+    document.getElementById('volSetupTitle').textContent = meta.name + ' 학습';
+    volMode = 'mixed';
+    volCount = 10;
+    document.querySelectorAll('#volModeList .select-card').forEach((c,i) => c.classList.toggle('selected', i===0));
+    document.querySelectorAll('#screen-volume-setup .count-btn').forEach((c,i) => c.classList.toggle('selected', i===0));
+    navigate('volume-setup');
+}
+
+function selectVolMode(el) {
+    document.querySelectorAll('#volModeList .select-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    volMode = el.dataset.mode;
+}
+
+function selectVolCount(el) {
+    document.querySelectorAll('#screen-volume-setup .count-btn').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    volCount = el.dataset.count === 'all' ? 'all' : parseInt(el.dataset.count);
+}
+
+function startVolumeSession() {
+    const pool = getQuestionsByVolume(selectedVolume);
+    const questions = selectByMode(pool, volMode, volCount);
+    if (questions.length === 0) { alert('해당 조건의 문항이 없습니다.'); return; }
+    const meta = VOLUME_META.find(v => v.id === selectedVolume);
+    launchSession(questions, 'volume', meta.name);
+}
+
+// ─── Chapter Select ───
+let selectedChapter = null;
+let chMode = 'mixed';
+let chCount = 10;
+
+function showChapterSelect() {
+    navigate('chapter');
+    const container = document.getElementById('chapterSelectList');
+    let html = '';
+    VOLUME_META.forEach(vol => {
+        vol.chapters.forEach(ch => {
+            const key = `${vol.id}-${ch.id}`;
+            const qs = getQuestionsByChapter(vol.id, ch.id);
+            let att = 0;
+            qs.forEach(q => { if (APP.progress[q.question_id]?.attempts > 0) att++; });
+            html += `<div class="select-card" onclick="selectChapter('${vol.id}','${ch.id}')">
+                <div class="select-card-title">${ch.name}</div>
+                <div class="select-card-sub">${vol.id} · ${qs.length}문항 · 풀이 ${att}문항</div>
+            </div>`;
+        });
+    });
+    container.innerHTML = html;
+}
+
+function selectChapter(volId, chId) {
+    selectedChapter = { vol: volId, ch: chId };
+    const vol = VOLUME_META.find(v => v.id === volId);
+    const ch = vol.chapters.find(c => c.id === chId);
+    document.getElementById('chSetupTitle').textContent = ch.name;
+    chMode = 'mixed';
+    chCount = 10;
+    document.querySelectorAll('#chModeList .select-card').forEach((c,i) => c.classList.toggle('selected', i===0));
+    document.querySelectorAll('#screen-chapter-setup .count-btn').forEach((c,i) => c.classList.toggle('selected', i===0));
+    navigate('chapter-setup');
+}
+
+function selectChMode(el) {
+    document.querySelectorAll('#chModeList .select-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    chMode = el.dataset.mode;
+}
+
+function selectChCount(el) {
+    document.querySelectorAll('#screen-chapter-setup .count-btn').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    chCount = el.dataset.count === 'all' ? 'all' : parseInt(el.dataset.count);
+}
+
+function startChapterSession() {
+    const pool = getQuestionsByChapter(selectedChapter.vol, selectedChapter.ch);
+    const questions = selectByMode(pool, chMode, chCount);
+    if (questions.length === 0) { alert('해당 조건의 문항이 없습니다.'); return; }
+    const vol = VOLUME_META.find(v => v.id === selectedChapter.vol);
+    const ch = vol.chapters.find(c => c.id === selectedChapter.ch);
+    launchSession(questions, 'chapter', ch.name);
+}
+
+// ─── Question Selection by Mode ───
+function selectByMode(pool, mode, count) {
+    let filtered;
+    switch(mode) {
+        case 'new':
+            filtered = pool.filter(q => !APP.progress[q.question_id] || APP.progress[q.question_id].attempts === 0);
+            break;
+        case 'wrong':
+            filtered = pool.filter(q => {
+                const p = APP.progress[q.question_id];
+                return p && p.attempts > 0 && !p.last_correct;
+            });
+            // Sort by most recent wrong first
+            filtered.sort((a,b) => {
+                const pa = APP.progress[a.question_id], pb = APP.progress[b.question_id];
+                return new Date(pb.last_seen_at) - new Date(pa.last_seen_at);
+            });
+            break;
+        case 'review':
+            filtered = pool.filter(q => {
+                const p = APP.progress[q.question_id];
+                return p && p.attempts > 0 && p.last_correct;
+            });
+            break;
+        case 'mixed':
+        default:
+            // Mix: wrong 35%, new 30%, review 22%, mastered 13%
+            const wrong = pool.filter(q => { const p = APP.progress[q.question_id]; return p && p.attempts > 0 && !p.last_correct; });
+            const newQ = pool.filter(q => !APP.progress[q.question_id] || APP.progress[q.question_id].attempts === 0);
+            const review = pool.filter(q => { const p = APP.progress[q.question_id]; return p && p.attempts > 0 && p.last_correct && p.correct_count < 2; });
+            const mastered = pool.filter(q => { const p = APP.progress[q.question_id]; return p && p.correct_count >= 2; });
+            [wrong, newQ, review, mastered].forEach(shuffleArray);
+
+            const total = count === 'all' ? pool.length : Math.min(count, pool.length);
+            const selected = [];
+            const usedIds = new Set();
+
+            [{p:wrong,r:0.35},{p:newQ,r:0.30},{p:review,r:0.22},{p:mastered,r:0.13}].forEach(({p:arr,r}) => {
+                const t = Math.round(total * r);
+                let added = 0;
+                for (const q of arr) {
+                    if (added >= t || selected.length >= total) break;
+                    if (!usedIds.has(q.question_id)) { selected.push(q); usedIds.add(q.question_id); added++; }
+                }
+            });
+            // Fill remaining
+            for (const q of [...wrong,...newQ,...review,...mastered]) {
+                if (selected.length >= total) break;
+                if (!usedIds.has(q.question_id)) { selected.push(q); usedIds.add(q.question_id); }
+            }
+            shuffleArray(selected);
+            return selected;
+    }
+
+    if (mode !== 'mixed') shuffleArray(filtered);
+    if (count !== 'all') filtered = filtered.slice(0, count);
+    return filtered;
+}
+
+// ─── Mock Setup ───
+let mockSize = 50;
+
+function showMockSetup() {
+    navigate('mock-setup');
+    mockSize = 50;
+    document.querySelectorAll('#screen-mock-setup .count-btn').forEach(el => {
+        el.classList.toggle('selected', el.dataset.mock === '50');
+    });
+    updateMockPreview();
+}
+
+function selectMockSize(el) {
+    document.querySelectorAll('#screen-mock-setup .count-btn').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    mockSize = parseInt(el.dataset.mock);
+    updateMockPreview();
+}
+
+function updateMockPreview() {
+    const timeMin = Math.round(mockSize * 1.2);
+    document.getElementById('mockTotalQ').textContent = mockSize + '문항';
+    document.getElementById('mockTimeLimit').textContent = timeMin + '분';
+
+    // Distribution proportional to question count
+    const totalAll = APP.allQuestions.length; // 305
+    let html = '';
+    VOLUME_META.forEach(vol => {
+        const volQ = getQuestionsByVolume(vol.id).length;
+        const allocated = Math.round(mockSize * volQ / totalAll);
+        html += `<div>${vol.name}: ~${allocated}문항</div>`;
+    });
+    document.getElementById('mockDistPreview').innerHTML = html;
+}
+
+function startMock() {
+    const questions = generateMockQuestions(mockSize);
+    if (questions.length < mockSize) {
+        if (!confirm(`사용 가능한 문항이 ${questions.length}개입니다. 계속하시겠습니까?`)) return;
+    }
+    const timeMin = Math.round(mockSize * 1.2);
+    launchSession(questions, 'mock', null, timeMin * 60);
+}
+
+function generateMockQuestions(size) {
+    const totalAll = APP.allQuestions.length;
+    const selected = [];
+    const usedIds = new Set();
+
+    VOLUME_META.forEach(vol => {
+        const volQs = [...getQuestionsByVolume(vol.id)];
+        shuffleArray(volQs);
+        const volTarget = Math.round(size * volQs.length / totalAll);
+
+        // Distribute across chapters proportionally
+        vol.chapters.forEach(ch => {
+            const chQs = volQs.filter(q => q.chapter === ch.id && !usedIds.has(q.question_id));
+            const chTotal = getQuestionsByChapter(vol.id, ch.id).length;
+            const chTarget = Math.max(1, Math.round(volTarget * chTotal / volQs.length));
+
+            for (let i = 0; i < Math.min(chTarget, chQs.length); i++) {
+                selected.push(chQs[i]);
+                usedIds.add(chQs[i].question_id);
+            }
+        });
+    });
+
+    // Trim if over size (rounding can cause +1)
+    while (selected.length > size) selected.pop();
+
+    // Fill up to size
+    const remaining = [...APP.allQuestions].filter(q => !usedIds.has(q.question_id));
+    shuffleArray(remaining);
+    while (selected.length < size && remaining.length > 0) {
+        selected.push(remaining.shift());
+    }
+
+    // Sort by volume+chapter for exam-like order
+    selected.sort((a,b) => {
+        if (a.volume !== b.volume) return a.volume.localeCompare(b.volume);
+        if (a.chapter !== b.chapter) return a.chapter.localeCompare(b.chapter);
+        return a.question_id.localeCompare(b.question_id);
+    });
+
+    return selected;
+}
+
+// ─── Session Launch & Question Flow ───
+let qTimer = null;
+let qElapsed = 0;
+let countdownTimer = null;
+let countdownRemaining = 0;
+
+function launchSession(questions, mode, label, countdownSec) {
+    APP.currentSession = {
+        mode: mode,
+        label: label || mode,
+        questions: questions,
+        questionOrder: questions.map(q => q.question_id),
+        currentIndex: 0,
+        answers: {},
+        shuffledChoices: {},
+        startedAt: new Date().toISOString(),
+        countdownMode: !!countdownSec,
+        countdownTotal: countdownSec || 0
+    };
+
+    if (countdownSec) {
+        countdownRemaining = countdownSec;
+    }
+
+    navigate('question');
+    renderQuestion();
+    saveResumeState();
+
+    if (countdownSec) startCountdown();
+}
+
+function renderQuestion() {
+    const sess = APP.currentSession;
+    if (!sess) return;
+    const idx = sess.currentIndex;
+    const q = sess.questions[idx];
+    const total = sess.questions.length;
+    const isMock = sess.mode === 'mock';
+
+    // Progress bar
+    document.getElementById('qCounter').textContent = `${idx+1}/${total}`;
+    document.getElementById('qProgressFill').style.width = `${(idx+1)/total*100}%`;
+
+    // Session info
+    document.getElementById('sessionInfoMode').textContent = sess.label;
+    document.getElementById('sessionInfoSubj').textContent = q.chapter_name;
+
+    // Shuffle choices (not for mock)
+    let choices, correctIdx;
+    if (sess.shuffledChoices[q.question_id]) {
+        const sc = sess.shuffledChoices[q.question_id];
+        choices = sc.choices;
+        correctIdx = sc.correctIndex;
+    } else if (isMock) {
+        choices = [...q.choices];
+        correctIdx = q.correct;
+        sess.shuffledChoices[q.question_id] = { choices, correctIndex: correctIdx, indexMap: [0,1,2,3] };
+    } else {
+        const sc = shuffleChoices(q);
+        choices = sc.choices;
+        correctIdx = sc.correctIndex;
+        sess.shuffledChoices[q.question_id] = sc;
+    }
+
+    // Build question body
+    let html = `<div class="q-tags">
+        <span class="q-tag">${q.volume} · ${q.chapter_name}</span>
+        <span class="q-tag">${q.question_id}</span>
+    </div>`;
+    html += `<div class="q-stem">${escapeHtml(q.stem)}</div>`;
+    html += `<div class="q-choices" id="qChoices">`;
+    choices.forEach((c, i) => {
+        const answered = sess.answers[q.question_id];
+        let cls = 'q-choice';
+        if (answered && !isMock) {
+            cls += ' disabled';
+            if (i === correctIdx) cls += ' correct';
+            else if (i === answered.selected) cls += ' wrong';
+        } else if (answered && isMock && answered.selected === i) {
+            cls += ' selected';
+        }
+        html += `<div class="${cls}" onclick="selectChoice(${i})" id="choice-${i}">
+            <div class="q-choice-num">${NUMS[i]}</div>
+            <div class="q-choice-text">${escapeHtml(c)}</div>
+        </div>`;
+    });
+    html += `</div>`;
+
+    // Feedback (if already answered and not mock)
+    const answered = sess.answers[q.question_id];
+    if (answered && !isMock) {
+        html += renderFeedback(q, answered.correct, correctIdx, choices);
+    }
+
+    document.getElementById('qBody').innerHTML = html;
+    document.getElementById('qBody').scrollTop = 0;
+
+    // Timer
+    if (sess.countdownMode) {
+        document.getElementById('qTimer').className = 'q-timer countdown' + (countdownRemaining < 60 ? ' warning' : '');
+        document.getElementById('qTimer').textContent = formatCountdown(countdownRemaining);
+    } else {
+        document.getElementById('qTimer').className = 'q-timer';
+        qElapsed = 0;
+        clearInterval(qTimer);
+        qTimer = setInterval(() => {
+            qElapsed++;
+            document.getElementById('qTimer').textContent = qElapsed + 's';
+        }, 1000);
+    }
+
+    // Navigation
+    if (isMock) {
+        document.getElementById('mockNavPanel').style.display = 'block';
+        document.getElementById('qNextWrap').style.display = 'none';
+        renderMockNav();
+    } else {
+        document.getElementById('mockNavPanel').style.display = 'none';
+        document.getElementById('qNextWrap').style.display = answered ? 'block' : 'none';
+        document.getElementById('qNextBtn').textContent = idx < total - 1 ? '다음 문항' : '결과 보기';
+    }
+}
+
+function selectChoice(idx) {
+    const sess = APP.currentSession;
+    const q = sess.questions[sess.currentIndex];
+    const qid = q.question_id;
+    const sc = sess.shuffledChoices[qid];
+    const isMock = sess.mode === 'mock';
+
+    if (isMock) {
+        sess.answers[qid] = { selected: idx, correct: null, elapsed_sec: 0 };
+        // Just highlight selection
+        document.querySelectorAll('.q-choice').forEach((el, i) => {
+            el.classList.toggle('selected', i === idx);
+        });
+        renderMockNav();
+        saveResumeState();
+        return;
+    }
+
+    // Already answered
+    if (sess.answers[qid]) return;
+
+    const isCorrect = idx === sc.correctIndex;
+    sess.answers[qid] = {
+        selected: idx,
+        correct: isCorrect,
+        elapsed_sec: qElapsed,
+        original_selected: sc.indexMap ? sc.indexMap[idx] : idx
+    };
+
+    clearInterval(qTimer);
+
+    // Update progress
+    updateProgress(q, isCorrect, qElapsed);
+
+    // Visual feedback
+    document.querySelectorAll('.q-choice').forEach((el, i) => {
+        el.classList.add('disabled');
+        if (i === sc.correctIndex) el.classList.add(i === idx ? 'correct' : 'show-correct');
+        else if (i === idx) el.classList.add('wrong');
+    });
+
+    // Add feedback
+    const feedbackHtml = renderFeedback(q, isCorrect, sc.correctIndex, sc.choices);
+    document.getElementById('qBody').insertAdjacentHTML('beforeend', feedbackHtml);
+
+    // Show next button
+    document.getElementById('qNextWrap').style.display = 'block';
+    const total = sess.questions.length;
+    document.getElementById('qNextBtn').textContent = sess.currentIndex < total - 1 ? '다음 문항' : '결과 보기';
+
+    saveResumeState();
+}
+
+function renderFeedback(q, isCorrect, correctIdx, choices) {
+    const cls = isCorrect ? 'correct-fb' : 'wrong-fb';
+    const verdict = isCorrect ? '정답입니다!' : '오답입니다';
+    const vCls = isCorrect ? 'correct-v' : 'wrong-v';
+    let html = `<div class="feedback ${cls}">
+        <div class="fb-verdict ${vCls}">${verdict}</div>`;
+
+    if (!isCorrect) {
+        html += `<div style="font-size:14px;color:#666;margin-bottom:8px">정답: ${NUMS[correctIdx]} ${escapeHtml(choices[correctIdx])}</div>`;
+    }
+
+    if (q.explanation && q.explanation.trim()) {
+        // Clean up explanation (remove image refs)
+        let expl = q.explanation.replace(/!\[\]\([^)]*\)/g, '').replace(/\\\s*/g, '').trim();
+        if (expl) {
+            html += `<div class="fb-explanation">${escapeHtml(expl)}</div>`;
+        }
+    }
+    html += `</div>`;
+    return html;
+}
+
+function nextQuestion() {
+    const sess = APP.currentSession;
+    if (!sess) return;
+
+    if (sess.currentIndex < sess.questions.length - 1) {
+        sess.currentIndex++;
+        renderQuestion();
+        saveResumeState();
+    } else {
+        finishSession();
+    }
+}
+
+function prevQuestion() {
+    const sess = APP.currentSession;
+    if (!sess || sess.currentIndex <= 0) return;
+    sess.currentIndex--;
+    renderQuestion();
+    saveResumeState();
+}
+
+function navigateToQuestion(idx) {
+    const sess = APP.currentSession;
+    if (!sess) return;
+    sess.currentIndex = idx;
+    renderQuestion();
+    saveResumeState();
+}
+
+// ─── Mock Nav ───
+function renderMockNav() {
+    const sess = APP.currentSession;
+    const grid = document.getElementById('mockNavGrid');
+    let html = '';
+    sess.questions.forEach((q, i) => {
+        const answered = sess.answers[q.question_id];
+        let cls = 'mock-nav-num';
+        if (answered) cls += ' answered';
+        if (i === sess.currentIndex) cls += ' current';
+        html += `<div class="${cls}" onclick="navigateToQuestion(${i})">${i+1}</div>`;
+    });
+    grid.innerHTML = html;
+
+    // Show/hide submit
+    const total = sess.questions.length;
+    const isLast = sess.currentIndex >= total - 1;
+    document.getElementById('mockNextBtn').style.display = isLast ? 'none' : 'block';
+    document.getElementById('mockSubmitBtn').style.display = 'block';
+}
+
+function submitMock() {
+    const sess = APP.currentSession;
+    const unanswered = sess.questions.filter(q => !sess.answers[q.question_id]).length;
+    if (unanswered > 0) {
+        if (!confirm(`미답 ${unanswered}문항이 있습니다. 제출하시겠습니까?`)) return;
+    } else {
+        if (!confirm('모의고사를 제출하시겠습니까?')) return;
+    }
+
+    // Grade all answers
+    sess.questions.forEach(q => {
+        const ans = sess.answers[q.question_id];
+        if (ans) {
+            const sc = sess.shuffledChoices[q.question_id];
+            ans.correct = ans.selected === sc.correctIndex;
+            updateProgress(q, ans.correct, 0);
+        }
+    });
+
+    clearInterval(countdownTimer);
+    finishSession();
+}
+
+// ─── Countdown ───
+function startCountdown() {
+    clearInterval(countdownTimer);
+    countdownTimer = setInterval(() => {
+        countdownRemaining--;
+        const el = document.getElementById('qTimer');
+        if (el) {
+            el.textContent = formatCountdown(countdownRemaining);
+            el.className = 'q-timer countdown' + (countdownRemaining < 60 ? ' warning' : '');
+        }
+        if (countdownRemaining <= 0) {
+            clearInterval(countdownTimer);
+            alert('시간이 종료되었습니다!');
+            submitMock();
+        }
+    }, 1000);
+}
+
+function formatCountdown(sec) {
+    if (sec <= 0) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+// ─── Progress Update ───
+function updateProgress(q, isCorrect, elapsed) {
+    const qid = q.question_id;
+    let p = APP.progress[qid];
+    if (!p) {
+        p = { question_id: qid, attempts: 0, correct_count: 0, last_correct: false, last_seen_at: null, total_time_sec: 0 };
+    }
+    p.attempts++;
+    if (isCorrect) p.correct_count++;
+    p.last_correct = isCorrect;
+    p.last_seen_at = new Date().toISOString();
+    p.total_time_sec = (p.total_time_sec || 0) + elapsed;
+    APP.progress[qid] = p;
+    Storage.saveProgress();
+}
+
+// ─── Finish Session ───
+function finishSession() {
+    const sess = APP.currentSession;
+    if (!sess) return;
+
+    clearInterval(qTimer);
+    clearInterval(countdownTimer);
+
+    const answered = sess.questions.filter(q => sess.answers[q.question_id]);
+    const correctCount = answered.filter(q => sess.answers[q.question_id]?.correct).length;
+    const totalAnswered = answered.length;
+    const pct = totalAnswered > 0 ? Math.round(correctCount / totalAnswered * 100) : 0;
+
+    // Volume breakdown
+    const volBreakdown = {};
+    sess.questions.forEach(q => {
+        const ans = sess.answers[q.question_id];
+        if (!volBreakdown[q.volume]) volBreakdown[q.volume] = { correct: 0, total: 0 };
+        volBreakdown[q.volume].total++;
+        if (ans?.correct) volBreakdown[q.volume].correct++;
+    });
+
+    const log = {
+        session_id: 'sess_' + Date.now(),
+        mode: sess.mode,
+        label: sess.label,
+        planned_question_count: sess.questions.length,
+        actual_question_count: totalAnswered,
+        correct_count: correctCount,
+        percentage: pct,
+        volume_breakdown: volBreakdown,
+        completed_at: new Date().toISOString(),
+        question_results: sess.questions.map(q => ({
+            question_id: q.question_id,
+            selected: sess.answers[q.question_id]?.selected ?? null,
+            correct: sess.answers[q.question_id]?.correct ?? null
+        }))
+    };
+
+    APP.sessions.push(log);
+    Storage.saveSessions();
+    Storage.clearResume();
+    APP.currentSession = null;
+
+    renderResult(log);
+    navigate('result');
+}
+
+// ─── Result Screen ───
+let lastSessionLog = null;
+
+function renderResult(log) {
+    lastSessionLog = log;
+    const pct = log.percentage;
+    const pass = pct >= 60;
+    document.getElementById('resultScore').textContent = pct + '%';
+    document.getElementById('resultScore').className = 'result-score ' + (pass ? 'pass' : 'fail');
+    document.getElementById('resultDetail').textContent = `${log.correct_count}/${log.actual_question_count}문항 정답`;
+
+    if (log.mode === 'mock') {
+        document.getElementById('resultPassFail').innerHTML = pass ?
+            '<span style="color:#27ae60">합격 (60% 이상)</span>' :
+            '<span style="color:#e74c3c">불합격 (60% 미만)</span>';
+    } else {
+        document.getElementById('resultPassFail').textContent = '';
+    }
+
+    // Volume breakdown
+    let subjHtml = '';
+    Object.keys(log.volume_breakdown).sort().forEach(vol => {
+        const vb = log.volume_breakdown[vol];
+        const vpct = vb.total > 0 ? Math.round(vb.correct / vb.total * 100) : 0;
+        const meta = VOLUME_META.find(v => v.id === vol);
+        const color = vpct >= 70 ? '#27ae60' : vpct >= 50 ? '#e67e22' : '#e74c3c';
+        subjHtml += `<div class="result-subj">
+            <div class="result-subj-name">${meta ? meta.name : vol}</div>
+            <div class="result-subj-score" style="color:${color}">${vpct}% (${vb.correct}/${vb.total})</div>
+        </div>`;
+    });
+    document.getElementById('resultSubjects').innerHTML = subjHtml;
+}
+
+// ─── Review ───
+let reviewIdx = 0;
+
+function showReviewList() {
+    navigate('review');
+    if (!lastSessionLog) return;
+    const container = document.getElementById('reviewList');
+    let html = '';
+    lastSessionLog.question_results.forEach((r, i) => {
+        const q = getQuestionById(r.question_id);
+        if (!q) return;
+        const isCorrect = r.correct;
+        const badge = isCorrect === null ? '' : isCorrect ?
+            '<div class="review-badge o">O</div>' :
+            '<div class="review-badge x">X</div>';
+        html += `<div class="review-item" onclick="showReviewDetail(${i})">
+            <div class="review-item-header">
+                ${badge}
+                <span class="review-num">${i+1}. ${r.question_id}</span>
+            </div>
+            <div class="review-stem">${escapeHtml(q.stem)}</div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function showReviewDetail(idx) {
+    reviewIdx = idx;
+    navigate('review-detail');
+    if (!lastSessionLog) return;
+    const r = lastSessionLog.question_results[idx];
+    const q = getQuestionById(r.question_id);
+    if (!q) return;
+
+    let html = `<div class="q-tags"><span class="q-tag">${q.volume} · ${q.chapter_name}</span></div>`;
+    html += `<div class="q-stem">${escapeHtml(q.stem)}</div>`;
+    html += `<div class="q-choices">`;
+    q.choices.forEach((c, i) => {
+        let cls = 'q-choice disabled';
+        if (i === q.correct) cls += ' correct';
+        else if (i === r.selected) cls += ' wrong';
+        html += `<div class="${cls}">
+            <div class="q-choice-num">${NUMS[i]}</div>
+            <div class="q-choice-text">${escapeHtml(c)}</div>
+        </div>`;
+    });
+    html += `</div>`;
+
+    if (q.explanation && q.explanation.trim()) {
+        let expl = q.explanation.replace(/!\[\]\([^)]*\)/g, '').replace(/\\\s*/g, '').trim();
+        if (expl) {
+            html += `<div class="feedback ${r.correct ? 'correct-fb' : 'wrong-fb'}" style="margin-top:16px">
+                <div class="fb-explanation">${escapeHtml(expl)}</div>
+            </div>`;
+        }
+    }
+
+    document.getElementById('reviewDetailContent').innerHTML = html;
+    document.getElementById('reviewNextBtn').style.display =
+        idx < lastSessionLog.question_results.length - 1 ? 'block' : 'none';
+}
+
+function reviewNext() {
+    if (lastSessionLog && reviewIdx < lastSessionLog.question_results.length - 1) {
+        showReviewDetail(reviewIdx + 1);
+    }
+}
+
+// ─── Wrong Notes ───
+let wrongNotesState = { filter: 'all', sortDesc: true, list: [] };
+
+function showWrongNotes() {
+    navigate('wrong-notes');
+    buildWrongFilters();
+    applyWrongFilter();
+}
+
+function buildWrongFilters() {
+    let html = `<span class="filter-chip active" data-filter="all" onclick="setWrongFilter(this)">전체</span>`;
+    VOLUME_META.forEach(vol => {
+        html += `<span class="filter-chip" data-filter="${vol.id}" onclick="setWrongFilter(this)">${vol.id}</span>`;
+    });
+    document.getElementById('wnFilters').innerHTML = html;
+}
+
+function setWrongFilter(el) {
+    document.querySelectorAll('#wnFilters .filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    wrongNotesState.filter = el.dataset.filter;
+    applyWrongFilter();
+}
+
+function toggleWrongSort() {
+    wrongNotesState.sortDesc = !wrongNotesState.sortDesc;
+    document.getElementById('wnSortBtn').textContent = wrongNotesState.sortDesc ? '최근순' : '오래된순';
+    applyWrongFilter();
+}
+
+function applyWrongFilter() {
+    let list = APP.allQuestions.filter(q => {
+        const p = APP.progress[q.question_id];
+        return p && p.attempts > 0 && !p.last_correct;
+    });
+
+    if (wrongNotesState.filter !== 'all') {
+        list = list.filter(q => q.volume === wrongNotesState.filter);
+    }
+
+    list.sort((a, b) => {
+        const pa = APP.progress[a.question_id], pb = APP.progress[b.question_id];
+        const da = new Date(pa.last_seen_at), db = new Date(pb.last_seen_at);
+        return wrongNotesState.sortDesc ? db - da : da - db;
+    });
+
+    wrongNotesState.list = list;
+    document.getElementById('wnCount').textContent = `${list.length}문항`;
+
+    const container = document.getElementById('wrongNotesList');
+    if (list.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">&#127881;</div><div class="empty-state-text">오답 문항이 없습니다!</div></div>`;
+        return;
+    }
+
+    let html = '';
+    list.forEach((q, i) => {
+        const p = APP.progress[q.question_id];
+        html += `<div class="wn-item" onclick="showWrongDetail(${i})">
+            <div class="wn-item-top">
+                <span class="wn-item-subj">${q.volume} · ${q.chapter_name}</span>
+            </div>
+            <div class="wn-item-stem">${escapeHtml(q.stem)}</div>
+            <div class="wn-item-meta">${p.correct_count}/${p.attempts}회 정답 · ${new Date(p.last_seen_at).toLocaleDateString('ko')}</div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+let wrongIdx = 0;
+
+function showWrongDetail(idx) {
+    wrongIdx = idx;
+    navigate('wrong-detail');
+    const q = wrongNotesState.list[idx];
+    if (!q) return;
+    const p = APP.progress[q.question_id];
+
+    let html = `<div class="q-tags"><span class="q-tag">${q.volume} · ${q.chapter_name}</span><span class="q-tag">${q.question_id}</span></div>`;
+    html += `<div style="font-size:12px;color:#888;margin-bottom:12px">${p.correct_count}/${p.attempts}회 정답</div>`;
+    html += `<div class="q-stem">${escapeHtml(q.stem)}</div>`;
+    html += `<div class="q-choices">`;
+    q.choices.forEach((c, i) => {
+        let cls = 'q-choice disabled';
+        if (i === q.correct) cls += ' correct';
+        html += `<div class="${cls}">
+            <div class="q-choice-num">${NUMS[i]}</div>
+            <div class="q-choice-text">${escapeHtml(c)}</div>
+        </div>`;
+    });
+    html += `</div>`;
+
+    if (q.explanation && q.explanation.trim()) {
+        let expl = q.explanation.replace(/!\[\]\([^)]*\)/g, '').replace(/\\\s*/g, '').trim();
+        if (expl) {
+            html += `<div class="feedback wrong-fb" style="margin-top:16px">
+                <div class="fb-explanation">${escapeHtml(expl)}</div>
+            </div>`;
+        }
+    }
+
+    document.getElementById('wrongDetailContent').innerHTML = html;
+    document.getElementById('wrongNextBtn').style.display =
+        idx < wrongNotesState.list.length - 1 ? 'block' : 'none';
+}
+
+function wrongNoteNext() {
+    if (wrongIdx < wrongNotesState.list.length - 1) {
+        showWrongDetail(wrongIdx + 1);
+    }
+}
+
+// ─── Resume / Pause ───
+function saveResumeState() {
+    const sess = APP.currentSession;
+    if (!sess) return;
+    Storage.saveResume({
+        mode: sess.mode,
+        label: sess.label,
+        questionOrder: sess.questionOrder,
+        currentIndex: sess.currentIndex,
+        answers: sess.answers,
+        shuffledChoices: sess.shuffledChoices,
+        startedAt: sess.startedAt,
+        countdownMode: sess.countdownMode,
+        countdownTotal: sess.countdownTotal,
+        countdownRemaining: countdownRemaining
+    });
+}
+
+function pauseSession() {
+    saveResumeState();
+    clearInterval(qTimer);
+    clearInterval(countdownTimer);
+    APP.currentSession = null;
+}
+
+function resumeSession() {
+    const r = APP.resume;
+    if (!r) return;
+
+    // Reconstruct questions from IDs
+    const questions = r.questionOrder.map(qid => getQuestionById(qid)).filter(Boolean);
+    if (questions.length === 0) { Storage.clearResume(); navigate('home'); return; }
+
+    // Validate currentIndex doesn't exceed reconstructed questions
+    if (r.currentIndex >= questions.length) r.currentIndex = questions.length - 1;
+
+    APP.currentSession = {
+        mode: r.mode,
+        label: r.label,
+        questions: questions,
+        questionOrder: r.questionOrder,
+        currentIndex: r.currentIndex,
+        answers: r.answers,
+        shuffledChoices: r.shuffledChoices,
+        startedAt: r.startedAt,
+        countdownMode: r.countdownMode,
+        countdownTotal: r.countdownTotal
+    };
+
+    if (r.countdownMode) {
+        countdownRemaining = r.countdownRemaining || 0;
+    }
+
+    navigate('question');
+    renderQuestion();
+
+    if (r.countdownMode && countdownRemaining > 0) startCountdown();
+}
+
+// ─── Settings ───
+function renderSettings() {
+    document.getElementById('settingsProfile').textContent = `사용자 ${APP.profile}`;
+
+    const totalQ = APP.allQuestions.length;
+    const attempted = Object.keys(APP.progress).filter(qid => APP.progress[qid].attempts > 0).length;
+    const wrong = Object.keys(APP.progress).filter(qid => APP.progress[qid].attempts > 0 && !APP.progress[qid].last_correct).length;
+    const sessCount = APP.sessions.length;
+
+    document.getElementById('settingsDataInfo').innerHTML =
+        `총 문항: ${totalQ}개<br>풀이 완료: ${attempted}개<br>오답: ${wrong}개<br>세션 기록: ${sessCount}회`;
+}
+
+function resetProgress() {
+    if (!confirm(`사용자 ${APP.profile}의 모든 학습 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    APP.progress = {};
+    APP.sessions = [];
+    APP.resume = null;
+    Storage.saveProgress();
+    Storage.saveSessions();
+    Storage.clearResume();
+    alert('초기화 완료');
+    renderSettings();
+}
+
+// ─── Utilities ───
+function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function shuffleChoices(q) {
+    const indices = [0, 1, 2, 3];
+    shuffleArray(indices);
+    return {
+        choices: indices.map(i => q.choices[i]),
+        correctIndex: indices.indexOf(q.correct),
+        indexMap: indices
+    };
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Initialization ───
+async function init() {
+    // Check for profile
+    const savedProfile = Storage.getProfile();
+    if (savedProfile) {
+        APP.profile = savedProfile;
+        await initAfterProfile();
+    } else {
+        navigate('profile', false);
+    }
+
+    // Visibility change - save state
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && APP.currentSession) saveResumeState();
+    });
+    window.addEventListener('beforeunload', () => {
+        if (APP.currentSession) saveResumeState();
+    });
+
+    // Hash navigation
+    window.addEventListener('hashchange', () => {
+        const hash = window.location.hash.slice(1);
+        if (hash === 'settings') renderSettings();
+    });
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+}
+
+init();
+</script>
+</body>
+</html>
