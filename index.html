@@ -580,6 +580,15 @@
             <div class="setting-label">데이터 현황</div>
             <div style="font-size:13px;color:#666;margin-top:8px;line-height:1.8" id="settingsDataInfo"></div>
         </div>
+        <div class="card">
+            <div class="setting-row">
+                <div class="setting-label">접속 기록</div>
+                <button class="btn btn-secondary btn-sm" onclick="toggleLoginLog()">펼치기</button>
+            </div>
+            <div id="loginLogArea" style="display:none;margin-top:8px;max-height:300px;overflow-y:auto">
+                <div style="font-size:12px;color:#666;line-height:1.8" id="loginLogContent"></div>
+            </div>
+        </div>
     </section>
 </div>
 
@@ -631,8 +640,54 @@ const Storage = {
     saveResume(state) { APP.resume = state; localStorage.setItem(this._key('resume'), JSON.stringify(state)); },
     clearResume() { APP.resume = null; localStorage.removeItem(this._key('resume')); },
     getProfile() { return localStorage.getItem('loan_exam_profile'); },
-    setProfile(p) { localStorage.setItem('loan_exam_profile', p); }
+    setProfile(p) { localStorage.setItem('loan_exam_profile', p); },
+    // ─── Login Log ───
+    loadLoginLog() { try { return JSON.parse(localStorage.getItem(this._key('loginLog'))) || []; } catch(e) { return []; } },
+    saveLoginLog(log) { localStorage.setItem(this._key('loginLog'), JSON.stringify(log)); },
+    clearLoginLog() { localStorage.removeItem(this._key('loginLog')); }
 };
+
+// ─── Login Log ───
+const LOG_ENDPOINT = '';  // ← Apps Script 배포 URL 입력
+
+let _loginStart = null;
+
+function logLogin() {
+    _loginStart = Date.now();
+}
+
+function logLogout() {
+    if (!_loginStart || !APP.profile || !LOG_ENDPOINT) return;
+    const duration = Math.round((Date.now() - _loginStart) / 1000);
+    if (duration < 3) { _loginStart = null; return; } // 3초 미만은 무시
+    const payload = {
+        user: APP.profile,
+        login: new Date(_loginStart).toISOString(),
+        durationSec: duration
+    };
+    // fire-and-forget
+    navigator.sendBeacon ?
+        navigator.sendBeacon(LOG_ENDPOINT, JSON.stringify(payload)) :
+        fetch(LOG_ENDPOINT, { method:'POST', body:JSON.stringify(payload), keepalive:true }).catch(()=>{});
+    _loginStart = null;
+}
+
+async function fetchLoginLog() {
+    if (!LOG_ENDPOINT) return [];
+    try {
+        const res = await fetch(`${LOG_ENDPOINT}?user=${APP.profile}`);
+        return await res.json();
+    } catch(e) { return []; }
+}
+
+function formatDuration(sec) {
+    if (sec < 60) return `${sec}초`;
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    if (m < 60) return `${m}분 ${s}초`;
+    const h = Math.floor(m / 60);
+    return `${h}시간 ${m % 60}분`;
+}
 
 // ─── Data Loading ───
 async function loadAllQuestions() {
@@ -699,6 +754,7 @@ function selectProfile(p) {
 
 function switchProfile() {
     if (!confirm('사용자를 전환하시겠습니까?')) return;
+    logLogout();
     navigate('profile');
 }
 
@@ -707,6 +763,7 @@ async function initAfterProfile() {
     Storage.loadSessions();
     Storage.loadResume();
     await loadAllQuestions();
+    logLogin();
     navigate('home');
 }
 
@@ -1832,6 +1889,35 @@ function renderSettings() {
         `총 문항: ${totalQ}개<br>풀이 완료: ${attempted}개<br>오답: ${wrong}개<br>세션 기록: ${sessCount}회`;
 }
 
+function toggleLoginLog() {
+    const area = document.getElementById('loginLogArea');
+    const btn = area.previousElementSibling.querySelector('button');
+    if (area.style.display === 'none') {
+        area.style.display = 'block';
+        btn.textContent = '접기';
+        renderLoginLog();
+    } else {
+        area.style.display = 'none';
+        btn.textContent = '펼치기';
+    }
+}
+
+async function renderLoginLog() {
+    const el = document.getElementById('loginLogContent');
+    if (!LOG_ENDPOINT) { el.innerHTML = 'LOG_ENDPOINT가 설정되지 않았습니다.'; return; }
+    el.innerHTML = '<span style="color:#999">불러오는 중...</span>';
+    const log = await fetchLoginLog();
+    if (!log.length) { el.innerHTML = '접속 기록이 없습니다.'; return; }
+    // Show newest first
+    const rows = log.slice().reverse().map(entry => {
+        const dur = entry.durationStr || formatDuration(entry.durationSec);
+        return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee"><span>${entry.login}</span><span style="color:#1B3C2A;font-weight:600">${dur}</span></div>`;
+    });
+    const totalSec = log.reduce((s, e) => s + (e.durationSec || 0), 0);
+    el.innerHTML =
+        `<div style="margin-bottom:8px;font-weight:600;color:#333">총 ${log.length}회 접속 · 누적 ${formatDuration(totalSec)}</div>` + rows.join('');
+}
+
 function resetProgress() {
     if (!confirm(`사용자 ${APP.profile}의 모든 학습 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
     if (!confirm('정말 삭제하시겠습니까?')) return;
@@ -1882,10 +1968,16 @@ async function init() {
 
     // Visibility change - save state
     document.addEventListener('visibilitychange', () => {
-        if (document.hidden && APP.currentSession) saveResumeState();
+        if (document.hidden) {
+            if (APP.currentSession) saveResumeState();
+            logLogout();
+        } else {
+            logLogin();
+        }
     });
     window.addEventListener('beforeunload', () => {
         if (APP.currentSession) saveResumeState();
+        logLogout();
     });
 
     // Hash navigation
