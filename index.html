@@ -156,7 +156,37 @@
         .q-choice.show-correct .q-choice-num { background:#27ae60; color:#fff; }
         .q-choice-text { font-size:15px; line-height:1.55; flex:1; word-break:keep-all; }
 
-        /* Feedback panel */
+        /* Feedback panel — new card design */
+        .feedback-new { animation:fadeIn .3s; }
+        .verdict-banner { text-align:center; padding:12px; border-radius:12px; margin-bottom:16px; }
+        .verdict-banner.correct { background:#eafaf1; }
+        .verdict-banner.wrong { background:#fdf0ee; }
+        .verdict-emoji { font-size:28px; }
+        .verdict-text { font-size:16px; font-weight:700; margin-top:4px; }
+        .verdict-banner.correct .verdict-text { color:#27ae60; }
+        .verdict-banner.wrong .verdict-text { color:#e74c3c; }
+        .verdict-answer { font-size:13px; color:#888; margin-top:4px; }
+
+        .fb-card { border-radius:12px; padding:14px 16px; margin-bottom:10px; border-left:4px solid; }
+        .fb-card-header { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+        .fb-card-icon { font-size:15px; }
+        .fb-card-title { font-size:13px; font-weight:700; letter-spacing:-.2px; }
+        .fb-card-body { font-size:14px; line-height:1.65; color:#333; word-break:keep-all; }
+        .fb-card-body strong { font-weight:700; padding:1px 5px; border-radius:4px; }
+
+        .fb-card.answer { background:#eafaf1; border-color:#27ae60; }
+        .fb-card.answer .fb-card-title { color:#1e8449; }
+        .fb-card.answer .fb-card-body strong { color:#145a32; background:rgba(39,174,96,.18); }
+
+        .fb-card.trap { background:#fef9e7; border-color:#f39c12; }
+        .fb-card.trap .fb-card-title { color:#b7791f; }
+        .fb-card.trap .fb-card-body strong { color:#7d5a00; background:rgba(243,156,18,.18); }
+
+        .fb-card.memorize { background:#ebf5fb; border-color:#3498db; }
+        .fb-card.memorize .fb-card-title { color:#2471a3; }
+        .fb-card.memorize .fb-card-body strong { color:#1a5276; background:rgba(52,152,219,.18); }
+
+        /* Legacy fallback */
         .feedback { margin-top:20px; padding:16px; border-radius:12px; animation:fadeIn .3s; }
         .feedback.correct-fb { background:#eafaf1; border-left:4px solid #27ae60; }
         .feedback.wrong-fb { background:#fdf0ee; border-left:4px solid #e74c3c; }
@@ -1308,23 +1338,48 @@ function selectChoice(idx) {
 }
 
 function renderFeedback(q, isCorrect, correctIdx, choices) {
-    const cls = isCorrect ? 'correct-fb' : 'wrong-fb';
-    const verdict = isCorrect ? '정답입니다!' : '오답입니다';
-    const vCls = isCorrect ? 'correct-v' : 'wrong-v';
-    let html = `<div class="feedback ${cls}">
-        <div class="fb-verdict ${vCls}">${verdict}</div>`;
+    const bannerCls = isCorrect ? 'correct' : 'wrong';
+    const emoji = isCorrect ? '🎉' : '😤';
+    const verdictText = isCorrect ? '정답!' : '오답입니다';
 
-    if (!isCorrect) {
-        html += `<div style="font-size:14px;color:#666;margin-bottom:8px">정답: ${NUMS[correctIdx]} ${escapeHtml(choices[correctIdx])}</div>`;
-    }
+    let html = `<div class="feedback-new">
+        <div class="verdict-banner ${bannerCls}">
+            <div class="verdict-emoji">${emoji}</div>
+            <div class="verdict-text">${verdictText}</div>
+            ${!isCorrect ? `<div class="verdict-answer">정답: ${NUMS[correctIdx]} ${escapeHtml(choices[correctIdx])}</div>` : ''}
+        </div>`;
 
-    if (q.explanation && q.explanation.trim()) {
-        // Clean up explanation (remove image refs)
+    // New structured explanation (answer_point / trap_check / memorize)
+    if (q.answer_point || q.trap_check || q.memorize) {
+        if (q.answer_point) {
+            html += `<div class="fb-card answer">
+                <div class="fb-card-header"><span class="fb-card-icon">🎯</span><span class="fb-card-title">정답 포인트</span></div>
+                <div class="fb-card-body">${q.answer_point}</div>
+            </div>`;
+        }
+        if (q.trap_check) {
+            html += `<div class="fb-card trap">
+                <div class="fb-card-header"><span class="fb-card-icon">⚠️</span><span class="fb-card-title">함정 체크</span></div>
+                <div class="fb-card-body">${q.trap_check}</div>
+            </div>`;
+        }
+        if (q.memorize) {
+            html += `<div class="fb-card memorize">
+                <div class="fb-card-header"><span class="fb-card-icon">📝</span><span class="fb-card-title">이건 외워!</span></div>
+                <div class="fb-card-body">${q.memorize}</div>
+            </div>`;
+        }
+    } else if (q.explanation && q.explanation.trim()) {
+        // Legacy fallback — plain text explanation
         let expl = q.explanation.replace(/!\[\]\([^)]*\)/g, '').replace(/\\\s*/g, '').trim();
         if (expl) {
-            html += `<div class="fb-explanation">${escapeHtml(expl)}</div>`;
+            html += `<div class="fb-card answer">
+                <div class="fb-card-header"><span class="fb-card-icon">📖</span><span class="fb-card-title">해설</span></div>
+                <div class="fb-card-body">${escapeHtml(expl)}</div>
+            </div>`;
         }
     }
+
     html += `</div>`;
     return html;
 }
